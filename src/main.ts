@@ -12,8 +12,9 @@ async function bootstrap() {
   // Activer CORS avec des configurations spécifiques
   app.enableCors({
     origin: [
-      'http://localhost:4200',  // Development Angular app
-      'https://ahoui-front.cluster-ig4.igpolytech.fr' // Deployed frontend
+      process.env.DEV_FRONT_URL,  // Development Angular app
+      process.env.PROD_FRONT_URL, // Deployed frontend
+      'capacitor://localhost', 'http://localhost' 
     ],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true, // Allow cookies and auth headers
