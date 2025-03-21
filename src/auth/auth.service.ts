@@ -1,88 +1,103 @@
-import {Injectable,forwardRef,Inject,UnauthorizedException,NotFoundException,} from '@nestjs/common';
-import * as bcrypt from 'bcrypt';  // Import bcrypt for password hashing and comparison
-import { JwtService } from '@nestjs/jwt';  // Import JwtService to handle JWT token generation
-import { ManagerService } from '../manager/manager.service';  // Import ManagerService to interact with manager data
-import { LoginDto } from './dto/login.dto';  // Import LoginDto to structure login data
+import { Injectable, forwardRef, Inject, UnauthorizedException, NotFoundException, BadRequestException } from '@nestjs/common';
+import * as bcrypt from 'bcrypt';
+import { JwtService } from '@nestjs/jwt';
+import { ManagerService } from '../manager/manager.service';
+import { LoginDto } from './dto/login.dto';
 
 @Injectable()
 export class AuthService {
   constructor(
-    // Inject ManagerService with forwardRef to prevent circular dependencies
     @Inject(forwardRef(() => ManagerService))
     private managerService: ManagerService,
-
-    // Inject JwtService for generating and verifying JWT tokens
     private jwtService: JwtService,
   ) {}
 
-  // Method to validate manager's credentials during login
+  /**
+   * Valide les identifiants du manager
+   * @param email Email du manager
+   * @param pass Mot de passe du manager
+   * @returns Le manager si les identifiants sont valides
+   * @throws NotFoundException si l'email n'existe pas
+   * @throws UnauthorizedException si le mot de passe est incorrect
+   */
   async validateManager(email: string, pass: string): Promise<any> {
-    // Fetch the manager by email
+    if (!email || !pass) {
+      throw new BadRequestException('Email et mot de passe sont requis');
+    }
+
     const manager = await this.managerService.findOne({ email });
-    
-    // If no manager is found, throw a NotFoundException
-    if (!manager) throw new NotFoundException('Email does not exist');
-    
-    // Compare provided password with stored hashed password
+
+    if (!manager) {
+      throw new NotFoundException('Aucun compte trouvé avec cet email');
+    }
+
     const isMatched = await this.comparePasswords(pass, manager.password);
-    
-    // If password doesn't match, throw an UnauthorizedException
-    if (!isMatched) throw new UnauthorizedException('Invalid password');
-    
-    // If validation is successful, return the manager data
+
+    if (!isMatched) {
+      throw new UnauthorizedException('Mot de passe incorrect');
+    }
+
     return manager;
   }
 
-// Method to generate a JWT token using the manager's email and ID
-async generateJwtToken(loginDto: LoginDto): Promise<string> {
-  // Check that email is provided; if not, throw an error
-  if (!loginDto.email) {
-    throw new Error("Email is missing from the login payload");
+  /**
+   * Génère un token JWT après validation du login
+   * @param loginDto Contient l'email et le mot de passe
+   * @returns Un token JWT
+   * @throws UnauthorizedException si les identifiants sont invalides
+   */
+  async generateJwtToken(loginDto: LoginDto): Promise<string> {
+    if (!loginDto.email || !loginDto.password) {
+      throw new BadRequestException('Email et mot de passe sont requis');
+    }
+
+    // Valide le manager avant de générer le token
+    const manager = await this.validateManager(loginDto.email, loginDto.password);
+
+    return this.jwtService.sign({ id: manager._id, email: manager.email });
   }
 
-  // Find the manager based on email to retrieve the ID
-  const manager = await this.managerService.findOne({ email: loginDto.email });
-  if (!manager) {
-    throw new Error("Manager not found");
+  /**
+   * Récupère le profil d'un manager par son ID
+   * @param managerId ID du manager
+   * @returns Les informations du manager sans le mot de passe
+   */
+  async getManagerProfileById(managerId: string): Promise<any> {
+    const manager = await this.managerService.findOne({ _id: managerId });
+
+    if (!manager) {
+      throw new NotFoundException('Manager introuvable');
+    }
+
+    // Supprime le mot de passe de l'objet retourné
+    const { password, ...safeData } = manager.toObject();
+    return safeData;
   }
 
-  // Generate and return a JWT token containing both email and ID in the payload
-  return this.jwtService.sign({ id: manager._id, email: manager.email });
+  /**
+   * Hache un mot de passe avant stockage
+   * @param password Mot de passe en clair
+   * @returns Mot de passe haché
+   */
+  async getHashedPassword(password: string): Promise<string> {
+    if (!password) {
+      throw new BadRequestException('Le mot de passe est requis');
+    }
+
+    return bcrypt.hash(password, 10);
+  }
+
+  /**
+   * Compare un mot de passe en clair avec un hash stocké
+   * @param password Mot de passe en clair
+   * @param hashedPassword Mot de passe haché
+   * @returns True si les mots de passe correspondent, False sinon
+   */
+  async comparePasswords(password: string, hashedPassword: string): Promise<boolean> {
+    if (!password || !hashedPassword) {
+      throw new BadRequestException('Les mots de passe sont requis pour la comparaison');
+    }
+
+    return bcrypt.compare(password, hashedPassword);
+  }
 }
-
- // Nouvelle méthode pour récupérer le profil du manager par ID
- async getManagerProfileById(managerId: string): Promise<any> {
-  const manager = await this.managerService.findOne({ _id: managerId });
-  if (!manager) throw new NotFoundException('Manager not found');
-  const { password, ...safeData } = manager.toObject();
-  return safeData;
-}
-
-  // Method to hash a plain-text password for secure storage
-  async getHashedPassword(password: string): Promise<any> {
-    // Use bcrypt to hash the password with a salt of 10 rounds
-    return new Promise((resolve, reject) => {
-      bcrypt.hash(password, 10, (err, hash) => {
-        if (err) {
-          reject(err);  // If hashing fails, reject with an error
-        }
-        resolve(hash);  // Resolve with the hashed password
-      });
-    });
-  }
-
-  // Method to compare a plain-text password with a hashed password
-  async comparePasswords(
-    password: string,
-    hashedPassword: string
-  ): Promise<any> {
-    // Use bcrypt to compare the passwords
-    return bcrypt
-      .compare(password, hashedPassword)
-      .then((isMatch) => {
-        return isMatch;  // Return true if passwords match, false otherwise
-      })
-      .catch((err) => err);  // Handle any errors that occur during comparison
-  }
-}
-

@@ -39,5 +39,6 @@ export class CreateSessionDto {
   saleComission: number;
 
   @IsNotEmpty()
+  @IsOptional()
   managerId: Types.ObjectId;
 }

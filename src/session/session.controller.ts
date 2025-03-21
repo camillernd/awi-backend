@@ -1,15 +1,21 @@
 //session.controller.ts
-import { Controller, Get, Post, Body, Param, Put, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Put, Delete, UseGuards, Req } from '@nestjs/common';
 import { SessionService } from './session.service';
 import { CreateSessionDto } from './dto/create-session.dto';
 import { UpdateSessionDto } from './dto/update-session.dto';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guards';
+import { Request } from 'express';
+import { ObjectId } from 'mongodb';
 
 @Controller('session')
 export class SessionController {
   constructor(private readonly sessionService: SessionService) {}
 
+  @UseGuards(JwtAuthGuard)
   @Post()
-  async create(@Body() createSessionDto: CreateSessionDto) {
+  async create(@Body() createSessionDto: CreateSessionDto, @Req() request : Request) {
+    const managerId = request.user['id'];
+    createSessionDto.managerId = new ObjectId(managerId);
     console.log('Requête de création de session reçue :', createSessionDto);
     return this.sessionService.create(createSessionDto);
   }
@@ -64,7 +70,4 @@ async checkHasDepositedGames(@Param('id') id: string): Promise<{ hasGames: boole
   const hasGames = await this.sessionService.hasDepositedGames(id);
   return { hasGames };
 }
-
-  
-
 }
