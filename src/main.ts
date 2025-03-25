@@ -12,7 +12,9 @@ async function bootstrap() {
   // Activer CORS avec des configurations spécifiques
   app.enableCors({
     origin: [
-      '*'
+      process.env.DEV_FRONT_URL,  // Development Angular app
+      process.env.PROD_FRONT_URL, // Deployed frontend
+      'capacitor://localhost', 'http://localhost' 
     ],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true, // Allow cookies and auth headers
