@@ -22,6 +22,14 @@ export class SellerService {
     return this.sellerModel.find().exec();
   }
 
+  async findBySessionId(sessionId: String) {
+    const sellers = await this.sellerModel
+      .find({ sessionId })
+      .exec();
+  
+    return sellers;
+  } 
+
   async findOne(id: string): Promise<Seller> {
     return this.sellerModel.findById(id).exec();
   }

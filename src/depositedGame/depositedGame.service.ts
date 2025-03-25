@@ -226,6 +226,14 @@ export class DepositedGameService {
     return depositedGames;
   }
 
+  async findGamesBySessionId(sessionId: string): Promise<DepositedGame[]> {
+    const depositedGames = await this.depositedGameModel
+      .find({ sessionId })
+      .exec();
+  
+    return depositedGames;
+  }
+
   async findAllWithSessions(): Promise<DepositedGame[]> {
     return this.depositedGameModel
       .find()

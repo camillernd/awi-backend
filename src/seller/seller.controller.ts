@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, Put, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Put, Delete, Req } from '@nestjs/common';
 import { SellerService } from './seller.service';
 import { CreateSellerDto } from './dto/create-seller.dto';
 import { UpdateSellerDto } from './dto/update-seller.dto';
@@ -21,6 +21,11 @@ export class SellerController {
   async findOne(@Param('id') id: string) {
     return this.sellerService.findOne(id);
   }
+
+  @Get('session/:sessionId')
+  async findBySessionId(@Param('sessionId') sessionId: String) {
+    return this.sellerService.findBySessionId(sessionId);
+  } 
 
   @Get('email/:email')
   async findByEmail(@Param('email') email: string) {

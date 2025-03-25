@@ -14,6 +14,7 @@ import { Client, ClientDocument } from '../schemas/client.schema';
 
 @Injectable()
 export class TransactionService {
+  
   constructor(
     @InjectModel(Transaction.name) private readonly transactionModel: Model<TransactionDocument>,
     @InjectModel(DepositedGame.name) private readonly depositedGameModel: Model<DepositedGameDocument>,
@@ -80,6 +81,8 @@ export class TransactionService {
     return transaction.save();
   }
 
+
+
   async findOne(id: string): Promise<Transaction> {
     const transaction = await this.transactionModel.findById(id).exec();
     if (!transaction) {
@@ -87,6 +90,12 @@ export class TransactionService {
     }
     return transaction;
   }
+
+  async findBySessionId(sessionId: string): Promise<Transaction[]> {
+    const transactions = await this.transactionModel
+      .find({ sessionId: sessionId }).exec();
+    return transactions;
+  }  
 
   //SARAH : il me manquait des attributs dans cette méthode ex : nom vendeur, email etc
   async findAll(): Promise<Transaction[]> {

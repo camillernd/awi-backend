@@ -6,7 +6,11 @@ export enum AgeRange {
   Child = "5-10",
   Preteen = "8-12",
   Teen = "12-18",
-  Adult = "18+"
+  Adult = "18+", 
+  Pegi3 = "3+",
+  Pegi7 = "7+",
+  Pegi12 = "12+",
+  Pegi16 = "16+"
 }
 
 export class CreateGameDescriptionDto {

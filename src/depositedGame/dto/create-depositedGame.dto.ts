@@ -1,4 +1,4 @@
-import { IsBoolean, IsNotEmpty, IsNumber } from 'class-validator';
+import { IsBoolean, IsNotEmpty, IsNumber, IsOptional } from 'class-validator';
 import { Types } from 'mongoose';
 
 export class CreateDepositedGameDto {
@@ -21,9 +21,11 @@ export class CreateDepositedGameDto {
 
   @IsBoolean()
   @IsNotEmpty()
+  @IsOptional()
   pickedUp: boolean;
 
   @IsBoolean()
   @IsNotEmpty()
+  @IsOptional()
   sold: boolean;
 }

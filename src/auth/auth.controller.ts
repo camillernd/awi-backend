@@ -16,8 +16,8 @@ export class AuthController {
 
   @Post('login')
   async login(@Body() loginDto: LoginDto) {
-    const token = await this.authService.generateJwtToken(loginDto);
-    return { token };
+    const { token, isAdmin } = await this.authService.generateJwtToken(loginDto);
+    return { token, isAdmin };
   }
 
   // Route pour récupérer le profil du manager

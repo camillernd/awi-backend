@@ -46,7 +46,7 @@ export class AuthService {
    * @returns Un token JWT
    * @throws UnauthorizedException si les identifiants sont invalides
    */
-  async generateJwtToken(loginDto: LoginDto): Promise<string> {
+  async generateJwtToken(loginDto: LoginDto): Promise<any> {
     if (!loginDto.email || !loginDto.password) {
       throw new BadRequestException('Email et mot de passe sont requis');
     }
@@ -54,7 +54,7 @@ export class AuthService {
     // Valide le manager avant de générer le token
     const manager = await this.validateManager(loginDto.email, loginDto.password);
 
-    return this.jwtService.sign({ id: manager._id, email: manager.email });
+    return { token:  this.jwtService.sign({ id: manager._id, email: manager.email }), isAdmin : manager.admin };
   }
 
   /**

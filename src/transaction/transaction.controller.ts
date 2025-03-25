@@ -18,6 +18,11 @@ export class TransactionController {
     const managerId = req.user.id;
     return this.transactionService.createTransaction(createTransactionDto, managerId);
   }
+  
+  @Get('by-session/:sessionId')
+  async findBySessionId(@Param('sessionId') sessionId: string) {
+    return this.transactionService.findBySessionId(sessionId);
+  }
 
   @Get(':id')
   async findOne(@Param('id') id: string) {

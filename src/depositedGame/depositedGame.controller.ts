@@ -28,6 +28,11 @@ export class DepositedGameController {
     return this.depositedGameService.findBySessionId(sessionId);
   }
 
+  @Get('session/:sessionId')
+  async findGamesBySessionID(@Param('sessionId') sessionId: string) {
+    return this.depositedGameService.findGamesBySessionId(sessionId);
+  }
+
   //SARAH : ajout d'une méthode pour récup les transactions par vendeur
   @Get('seller/:sellerId')
   async findDepositedGamesBySellerId(@Param('sellerId') sellerId: string): Promise<DepositedGame[]> {
