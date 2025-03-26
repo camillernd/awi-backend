@@ -11,7 +11,7 @@ async function bootstrap() {
 
   // Activer CORS avec des configurations spécifiques
   app.enableCors({
-    origin: 'http://ludi.cluster-ig4.igpolytech.fr',
+    origin: '*',
     allowedHeaders: 'X-Requested-With, X-HTTP-Method-Override, Content-Type, Accept, Observe',
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true, // Allow cookies and auth headers

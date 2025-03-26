@@ -21,7 +21,7 @@ dotenv.config();
 
 @Module({
   imports: [
-    MongooseModule.forRoot(process.env.MONGODB_URI),
+    MongooseModule.forRoot('mongodb+srv://camillerenard:4ogheVqhTV2WtyC1@iwa-cluster.ygf3n.mongodb.net/?retryWrites=true&w=majority&appName=iwa-cluster'),
     MongooseModule.forFeature([{ name: Manager.name, schema: ManagerSchema }]),
     AuthModule,
     ManagerModule,
